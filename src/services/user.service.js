@@ -1,4 +1,6 @@
 import { authHeader } from '../helpers';
+import axios from 'axios';
+import { history } from '../helpers';
 
 export const userService = {
     login,
@@ -8,29 +10,63 @@ export const userService = {
 };
 
 function login(username, password) {
+    debugger
     const requestOptions = {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ username, password })
     };
-
-    return fetch('/users/authenticate', requestOptions)
+    axios.get('https://swapi.co/api/people', {
+        params: {
+            search: username
+        }
+    })
         .then(response => {
-            if (!response.ok) { 
-                return Promise.reject(response.statusText);
-            }
+            debugger
+            // if (!response.ok) {
+            //     return Promise.reject(response.statusText);
+            // }
 
-            return response.json();
+            return response;
         })
         .then(user => {
+            debugger
             // login successful if there's a jwt token in the response
             if (user && user.token) {
                 // store user details and jwt token in local storage to keep user logged in between page refreshes
                 localStorage.setItem('user', JSON.stringify(user));
             }
-
-            return user;
+            history.push('/home');
+            //return user;
         });
+    //  .then(function (response) {
+    //     debugger
+    //     if (response.data.results[0].name === username)
+    //         if (response.data.results[0].birth_year === password)
+    //             localStorage.setItem('user', JSON.stringify(response.data.results[0]));
+    //     return
+    // })
+    //     .catch(function (error) {
+    //         debugger
+    //         console.log(error);
+    //     });
+    // return fetch('https://swapi.co/api/people?search={0}', requestOptions)
+    //     .then(response => {
+    //         if (!response.ok) { 
+    //             return Promise.reject(response.statusText);
+    //         }
+
+    //         return response.json();
+    //     })
+    //     .then(user => {
+    //         // login successful if there's a jwt token in the response
+    //         if (user && user.token) {
+    //             // store user details and jwt token in local storage to keep user logged in between page refreshes
+    //             localStorage.setItem('user', JSON.stringify(user));
+    //         }
+
+    //         return user;
+    //     });
 }
 
 function logout() {
@@ -57,7 +93,7 @@ function getById(id) {
 }
 
 function handleResponse(response) {
-    if (!response.ok) { 
+    if (!response.ok) {
         return Promise.reject(response.statusText);
     }
 
